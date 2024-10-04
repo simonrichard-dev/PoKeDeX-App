@@ -4,13 +4,14 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {ThemedText} from "@/components/ThemedText";
 import {useThemeColors} from "@/hooks/useThemeColors";
 import {Card} from "@/components/Card";
+import {PokemonCard} from "@/components/pokemon/PokemonCard";
+import {useFetchQuery} from "@/hooks/useFetchQuery";
+import {getPokemonId} from "@/functions/pokemon";
 
 export default function Index() {
     const colors = useThemeColors()
-    const pokemons = Array.from({length: 35}, (_, k) => ({
-        name: 'Pokémon name',
-        id: k + 1
-    }))
+    const {data} = useFetchQuery('/pokemon?limit=21')
+    const pokemons = data?.results ?? []
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: colors.tint}]}>
         <View style={styles.header}>
@@ -23,9 +24,8 @@ export default function Index() {
             numColumns={3}
             contentContainerStyle={[styles.gridGap, styles.list]}
             columnWrapperStyle={styles.gridGap}
-            renderItem={({item}) => <Card style={{flex: 1/3, height: 200}}>
-                <Text>{item.name}</Text>
-            </Card>} keyExtractor={(item) => item.id.toString()}/>
+            renderItem={({item}) => <PokemonCard id={getPokemonId(item.url)} name={item.name} style={{flex: 1/3}}/>}
+            keyExtractor={(item) => item.url}/>
         </Card>
     </SafeAreaView>
   );
