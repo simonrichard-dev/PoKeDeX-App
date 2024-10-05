@@ -26,10 +26,16 @@ export function SearchBar ({value, onChange}: Props) {
 }
 
 const styles = StyleSheet.create({
-    wrapper : {
+    wrapper: {
         flex: 1,
         borderRadius: 16,
         height: 32,
         paddingHorizontal: 12,
     },
+    input: {
+        flex: 1,
+        height: 16,
+        fontSize: 10,
+        lineHeight: 16,
+        }
 })

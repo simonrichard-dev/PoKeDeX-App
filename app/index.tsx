@@ -10,13 +10,26 @@ import {getPokemonId} from "@/functions/pokemon";
 import {SearchBar} from "@/components/SearchBar";
 import {useState} from "react";
 import {Row} from "@/components/Row";
+import {SortButton} from "@/components/SortButton";
+
 
 
 export default function Index() {
-    const colors = useThemeColors()
-    const {data, isFetching, fetchNextPage} = useInfiniteFetchQuery('/pokemon?limit=21')
-    const pokemons = data?.pages.flatMap(page => page.results) ?? []
-    const [search, setSearch] = useState('')
+    const colors = useThemeColors();
+    const {data, isFetching, fetchNextPage} = useInfiniteFetchQuery('/pokemon?limit=21');
+    const [search, setSearch] = useState('');
+    const [sortKey, setSortKey] = useState<"id" | "name">("id");
+    const pokemons = data?.pages.flatMap((page) => page.results.map(r => ({name: r.name, id: getPokemonId(r.url)}))) ?? [];
+    const filteredPokemons = [
+        ...(search
+             ? pokemons.filter(
+                 (p) =>
+                    p.name.includes(search.toLowerCase()) ||
+                    p.id.toString() == search,
+               )
+             : pokemons),
+    ].sort((a, b) => (a[sortKey] < b[sortKey] ? -1 : 1));
+
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: colors.tint}]}>
         <Row style={styles.header} gap={16}>
@@ -25,21 +38,23 @@ export default function Index() {
             PoKeDeX
             </ThemedText>
         </Row>
-        <Row>
-            <SearchBar value={search} onChange={setSearch}/>
+        <Row gap={16}>
+            <SearchBar value={search} onChange={setSearch} />
+            <SortButton value={sortKey} onChange={setSortKey} />
         </Row>
         <Card style={styles.body}>
             <FlatList
-            data={pokemons}
+            data={filteredPokemons}
             numColumns={3}
             contentContainerStyle={[styles.gridGap, styles.list]}
             columnWrapperStyle={styles.gridGap}
             ListFooterComponent={
                 isFetching ? <ActivityIndicator color={colors.tint}/> : null
             }
-            onEndReached={() => fetchNextPage()}
-            renderItem={({item}) => <PokemonCard id={getPokemonId(item.url)} name={item.name} style={{flex: 1/3}}/>}
-            keyExtractor={(item) => item.url}/>
+            onEndReached={search ? undefined : () => fetchNextPage()}
+            renderItem={({ item }) => <PokemonCard id={item.id} name={item.name} style={{flex: 1/3}}/>}
+            keyExtractor={(item) => item.id.toString()}
+            />
         </Card>
     </SafeAreaView>
   );
@@ -48,19 +63,20 @@ export default function Index() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 4
+        padding: 4,
     },
     header: {
-        padding: 12
+        paddingHorizontal: 12,
+        paddingVertical: 8,
     },
     body: {
-        flex: 1
+        flex: 1,
+        marginTop: 16,
     },
     gridGap: {
-        gap: 8
+        gap: 8,
     },
     list: {
-        padding: 12
-
-        }
+        padding: 12,
+    }
 })
