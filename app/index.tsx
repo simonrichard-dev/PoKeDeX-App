@@ -20,6 +20,7 @@ export default function Index() {
     const [search, setSearch] = useState('');
     const [sortKey, setSortKey] = useState<"id" | "name">("id");
     const pokemons = data?.pages.flatMap((page) => page.results.map(r => ({name: r.name, id: getPokemonId(r.url)}))) ?? [];
+
     const filteredPokemons = [
         ...(search
              ? pokemons.filter(
@@ -38,7 +39,7 @@ export default function Index() {
             PoKeDeX
             </ThemedText>
         </Row>
-        <Row gap={16}>
+        <Row gap={16} style={styles.form}>
             <SearchBar value={search} onChange={setSearch} />
             <SortButton value={sortKey} onChange={setSortKey} />
         </Row>
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 12,
-        paddingVertical: 8,
+        paddingBottom: 8,
     },
     body: {
         flex: 1,
@@ -78,5 +79,8 @@ const styles = StyleSheet.create({
     },
     list: {
         padding: 12,
-    }
+    },
+    form: {
+        paddingHorizontal: 12,
+    },
 })
