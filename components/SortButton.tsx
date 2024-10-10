@@ -1,9 +1,10 @@
-import { Shadows, Dimensions, Text, Modal, Pressable, Image, StyleSheet, View } from "react-native";
+import { Dimensions, Text, Modal, Pressable, Image, StyleSheet, View } from "react-native";
 import {useThemeColors} from "@/hooks/useThemeColors";
 import {ThemedText} from "@/components/ThemedText";
 import {Row} from "@/components/Row";
 import {Card} from "@/components/Card";
-import {Radio} from "@/components/Radio"
+import {Radio} from "@/components/Radio";
+import {Shadows} from "@/constants/Shadows";
 import {useRef, useState} from 'react';
 
 type Props = {
@@ -103,6 +104,7 @@ const styles = StyleSheet.create({
         paddingTop: 16,
         gap: 16,
         borderRadius: 12,
+        ...Shadows.dp2,
     },
     title: {
         paddingLeft: 20,
