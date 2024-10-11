@@ -10,6 +10,7 @@ import {getPokemonArtwork, formatWeight, formatSize} from "@/functions/pokemon";
 import {Card} from "@/components/Card";
 import {PokemonType} from "@/components/pokemon/PokemonType";
 import {PokemonSpec} from "@/components/pokemon/PokemonSpec";
+import {PokemonStat} from "@/components/pokemon/PokemonStat";
 
 
 export default function Pokemon() {
@@ -31,33 +32,33 @@ export default function Pokemon() {
                     source={require("@/assets/images/pokeball_big.png")}
                     width={208}
                     heigth={208}
+                />
+                <Row style={styles.header}>
+                    <Pressable onPress={router.back}>
+                        <Row gap={8}>
+                            <Image
+                                source={require("@/assets/images/back.png")}
+                                width={32}
+                                height={32}
+                            />
+                            <ThemedText
+                                color="grayWhite"
+                                variant="headline"
+                                style={{ textTransform: "capitalize"
+                            }}>
+                                {pokemon?.name}
+                            </ThemedText>
+                        </Row>
+                    </Pressable>
+                    <ThemedText color="grayWhite" variant="subtitle2">
+                        #{params.id.padStart(3, '0')}
+                    </ThemedText>
+                </Row>
+                <View style={styles.body}>
+                    <Image
+                        source={{uri: getPokemonArtwork(params.id)}}
+                        style={[styles.artwork, {width: 200, height: 200}]}
                     />
-                    <Row style={styles.header}>
-                        <Pressable onPress={router.back}>
-                            <Row gap={8}>
-                                <Image
-                                    source={require("@/assets/images/back.png")}
-                                    width={32}
-                                    height={32}
-                                />
-                                <ThemedText
-                                    color="grayWhite"
-                                    variant="headline"
-                                    style={{ textTransform: "capitalize"
-                                }}>
-                                    {pokemon?.name}
-                                </ThemedText>
-                            </Row>
-                        </Pressable>
-                        <ThemedText color="grayWhite" variant="subtitle2">
-                            #{params.id.padStart(3, '0')}
-                        </ThemedText>
-                    </Row>
-                    <View style={styles.body}>
-                        <Image
-                            source={{uri: getPokemonArtwork(params.id)}}
-                            style={[styles.artwork, {width: 200, height: 200}]}
-                        />
                     <Card style={styles.card}>
                         <Row gap={16}>
                             {types.map((type) => (
@@ -96,15 +97,24 @@ export default function Pokemon() {
                                 description="Moves"
                             />
                         </Row>
-
-                        {/* About */}
                         <ThemedText>{bio}</ThemedText>
+
                         <ThemedText variant="subtitle1" style={{ color: colorType }}>
                             Base stats
                         </ThemedText>
+
+                        <View style={{ alignSelf: "stretch" }}>
+                            {pokemon?.stats.map(stat => (
+                                <PokemonStat
+                                    key={stat.stat.name}
+                                    name={stat.stat.name}
+                                    value={stat.base_stat}
+                                    color={colorType}
+                                />
+                            ))}
+                        </View>
                     </Card>
-                    </View>
-                    <Text>Pokemon {params.id}</Text>
+                </View>
             </View>
         </RootView>
     );
@@ -117,7 +127,7 @@ const styles = StyleSheet.create ({
     },
     pokeball: {
         opacity: .1,
-        position: 'absolute',
+        position: "absolute",
         right: 8,
         top: 8,
     },
@@ -134,6 +144,7 @@ const styles = StyleSheet.create ({
         alignItems: "center",
         paddingHorizontal: 20,
         paddingTop: 60,
+        paddingBottom: 18,
         gap: 16,
     },
 });
