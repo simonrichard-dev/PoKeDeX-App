@@ -36,8 +36,8 @@ Before installing the application, make sure you have:
 
 ## Technologies Used
 
-- React Native []
-- TypeScript []
+- [React Native] (https://reactnative.dev/)
+- [TypeScript] (https://www.typescriptlang.org/)
 
 ## Author
 
