@@ -6,32 +6,56 @@ import {ThemedText} from "@/components/ThemedText";
 import {useFetchQuery} from "@/hooks/useFetchQuery";
 import {Colors} from "@/constants/Colors";
 import {useThemeColors} from "@/hooks/useThemeColors";
-import {getPokemonArtwork, formatWeight, formatSize} from "@/functions/pokemon";
+import {Audio} from 'expo-av';
+import {
+    getPokemonArtwork,
+    formatWeight,
+    formatSize,
+    basePokemonStats,
+} from "@/functions/pokemon";
 import {Card} from "@/components/Card";
 import {PokemonType} from "@/components/pokemon/PokemonType";
 import {PokemonSpec} from "@/components/pokemon/PokemonSpec";
 import {PokemonStat} from "@/components/pokemon/PokemonStat";
 
-
 export default function Pokemon() {
     const colors = useThemeColors();
     const params = useLocalSearchParams() as {id: string};
     const {data: pokemon} = useFetchQuery("/pokemon/[id]", {id: params.id});
-    const {data: species} = useFetchQuery("/pokemon-species/[id]", {id: params.id});
+    const {data: species} = useFetchQuery("/pokemon-species/[id]", {
+        id: params.id,
+    });
     const mainType = pokemon?.types?.[0].type.name;
     const colorType = mainType ? Colors.type[mainType] : colors.tint;
     const types = pokemon?.types ?? [];
     const bio = species?.flavor_text_entries
         ?.find(({language}) => language.name == 'en')
         ?.flavor_text.replaceAll("\n", ". ");
+
+    const stats = pokemon?.stats ?? basePokemonStats;
+
+    const onImagePress = async () => {
+        const cry = pokemon?.cries.latest
+        if (!cry) {
+            return;
+        }
+        const {sound} = await Audio.Sound.createAsync({
+            uri: cry
+        }, {shouldPlay: true})
+        sound.playAsync()
+    };
+
     return (
-        <RootView style={{ backgroundColor: colorType}}>
+        <RootView backgroundColor={colorType}>
             <View>
+
+                        {/* Header Section */}
+
                 <Image
                     style={styles.pokeball}
                     source={require("@/assets/images/pokeball_big.png")}
                     width={208}
-                    heigth={208}
+                    height={208}
                 />
                 <Row style={styles.header}>
                     <Pressable onPress={router.back}>
@@ -54,17 +78,30 @@ export default function Pokemon() {
                         #{params.id.padStart(3, '0')}
                     </ThemedText>
                 </Row>
+
+                        {/* Image Section */}
+
                 <View style={styles.body}>
-                    <Image
-                        source={{uri: getPokemonArtwork(params.id)}}
-                        style={[styles.artwork, {width: 200, height: 200}]}
-                    />
+                    <Row style={styles.imageRow}>
+                        <Pressable onPress={onImagePress}>
+                            <Image
+                                style={styles.artwork}
+                                source={{uri: getPokemonArtwork(params.id)}}
+                                width={200}
+                                height={200}
+                            />
+                        </Pressable>
+                    </Row>
+
                     <Card style={styles.card}>
-                        <Row gap={16}>
+                        <Row gap={16} style={{ height: 20 }}>
                             {types.map((type) => (
                                 <PokemonType name={type.type.name} key={type.type.name} />
                             ))}
                         </Row>
+
+                        {/* About Section */}
+
                         <ThemedText variant="subtitle1" style={{ color: colorType }}>
                             About
                         </ThemedText>
@@ -99,12 +136,14 @@ export default function Pokemon() {
                         </Row>
                         <ThemedText>{bio}</ThemedText>
 
+                        {/* Base Stats Section */}
+
                         <ThemedText variant="subtitle1" style={{ color: colorType }}>
                             Base stats
                         </ThemedText>
 
                         <View style={{ alignSelf: "stretch" }}>
-                            {pokemon?.stats.map(stat => (
+                            {stats.map(stat => (
                                 <PokemonStat
                                     key={stat.stat.name}
                                     name={stat.stat.name}
@@ -120,6 +159,8 @@ export default function Pokemon() {
     );
 }
 
+                        {/* Style Section */}
+
 const styles = StyleSheet.create ({
     header: {
         margin: 20,
@@ -131,11 +172,12 @@ const styles = StyleSheet.create ({
         right: 8,
         top: 8,
     },
-    artwork: {
-        alignSelf: "center",
+    imageRow: {
         position: "absolute",
         top: -140,
         zIndex: 2,
+    },
+    artwork: {
     },
     body: {
         marginTop: 144,
@@ -147,4 +189,5 @@ const styles = StyleSheet.create ({
         paddingBottom: 18,
         gap: 16,
     },
+
 });
