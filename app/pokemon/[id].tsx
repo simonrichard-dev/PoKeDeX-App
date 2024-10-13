@@ -31,6 +31,7 @@ export default function Pokemon() {
     const bio = species?.flavor_text_entries
         ?.find(({language}) => language.name == 'en')
         ?.flavor_text.replaceAll("\n", ". ");
+    const id = parseInt(params.id, 10);
 
     const stats = pokemon?.stats ?? basePokemonStats;
 
@@ -44,6 +45,17 @@ export default function Pokemon() {
         }, {shouldPlay: true})
         sound.playAsync()
     };
+
+    const onPrevious = () => {
+        router.replace({pathname: '/pokemon/[id]', params: {id: Math.max(id - 1, 1)}})
+    };
+
+    const onNext = () => {
+        router.replace({pathname: '/pokemon/[id]', params: {id: Math.min(id + 1, 1025)}})
+    };
+
+    const isFirst = id == 1;
+    const isLast = id ==1025;
 
     return (
         <RootView backgroundColor={colorType}>
@@ -81,8 +93,20 @@ export default function Pokemon() {
 
                         {/* Image Section */}
 
-                <View style={styles.body}>
+
+                <Card style={[styles.card, { overflow: "visible" }]}>
                     <Row style={styles.imageRow}>
+                        {isFirst ? (
+                            <View style={{width: 24, height: 24}}></View>
+                        ) : (
+                            <Pressable onPress={onPrevious}>
+                                <Image
+                                    width={24}
+                                    height={24}
+                                    source={require("@/assets/images/prev.png")}
+                                />
+                            </Pressable>
+                        )}
                         <Pressable onPress={onImagePress}>
                             <Image
                                 style={styles.artwork}
@@ -91,69 +115,78 @@ export default function Pokemon() {
                                 height={200}
                             />
                         </Pressable>
+                        {isLast ? (
+                            <View style={{width: 24, height: 24}}></View>
+                        ) : (
+                            <Pressable onPress={onNext}>
+                                <Image
+                                    width={24}
+                                    height={24}
+                                    source={require("@/assets/images/next.png")}
+                                />
+                            </Pressable>
+                        )}
                     </Row>
 
-                    <Card style={styles.card}>
-                        <Row gap={16} style={{ height: 20 }}>
-                            {types.map((type) => (
-                                <PokemonType name={type.type.name} key={type.type.name} />
-                            ))}
-                        </Row>
+                    <Row gap={16} style={{ height: 20 }}>
+                        {types.map((type) => (
+                            <PokemonType name={type.type.name} key={type.type.name} />
+                        ))}
+                    </Row>
 
-                        {/* About Section */}
+                    {/* About Section */}
 
-                        <ThemedText variant="subtitle1" style={{ color: colorType }}>
-                            About
-                        </ThemedText>
-                        <Row>
-                            <PokemonSpec
-                                style={{
-                                    borderStyle: "solid",
-                                    borderRightWidth: 1,
-                                    borderColor: colors.grayLight,
-                                }}
-                                title={formatWeight(pokemon?.weight)}
-                                description="Weight"
-                                image={require("@/assets/images/weight.png")}
+                    <ThemedText variant="subtitle1" style={{ color: colorType }}>
+                        About
+                    </ThemedText>
+                    <Row>
+                        <PokemonSpec
+                            style={{
+                                borderStyle: "solid",
+                                borderRightWidth: 1,
+                                borderColor: colors.grayLight,
+                            }}
+                            title={formatWeight(pokemon?.weight)}
+                            description="Weight"
+                            image={require("@/assets/images/weight.png")}
+                        />
+                        <PokemonSpec
+                            style={{
+                                borderStyle: "solid",
+                                borderRightWidth: 1,
+                                borderColor: colors.grayLight,
+                            }}
+                            title={formatSize(pokemon?.height)}
+                            description="Size"
+                            image={require("@/assets/images/size.png")}
+                        />
+                        <PokemonSpec
+                            title={pokemon?.moves
+                                .slice(0, 2)
+                                .map((m) => m.move.name)
+                                .join("\n")}
+                            description="Moves"
+                        />
+                    </Row>
+                    <ThemedText>{bio}</ThemedText>
+
+                    {/* Base Stats Section */}
+
+                    <ThemedText variant="subtitle1" style={{ color: colorType }}>
+                        Base stats
+                    </ThemedText>
+
+                    <View style={{ alignSelf: "stretch" }}>
+                        {stats.map(stat => (
+                            <PokemonStat
+                                key={stat.stat.name}
+                                name={stat.stat.name}
+                                value={stat.base_stat}
+                                color={colorType}
                             />
-                            <PokemonSpec
-                                style={{
-                                    borderStyle: "solid",
-                                    borderRightWidth: 1,
-                                    borderColor: colors.grayLight,
-                                }}
-                                title={formatSize(pokemon?.height)}
-                                description="Size"
-                                image={require("@/assets/images/size.png")}
-                            />
-                            <PokemonSpec
-                                title={pokemon?.moves
-                                    .slice(0, 2)
-                                    .map((m) => m.move.name)
-                                    .join("\n")}
-                                description="Moves"
-                            />
-                        </Row>
-                        <ThemedText>{bio}</ThemedText>
-
-                        {/* Base Stats Section */}
-
-                        <ThemedText variant="subtitle1" style={{ color: colorType }}>
-                            Base stats
-                        </ThemedText>
-
-                        <View style={{ alignSelf: "stretch" }}>
-                            {stats.map(stat => (
-                                <PokemonStat
-                                    key={stat.stat.name}
-                                    name={stat.stat.name}
-                                    value={stat.base_stat}
-                                    color={colorType}
-                                />
-                            ))}
-                        </View>
-                    </Card>
-                </View>
+                        ))}
+                    </View>
+                </Card>
             </View>
         </RootView>
     );
@@ -176,11 +209,12 @@ const styles = StyleSheet.create ({
         position: "absolute",
         top: -140,
         zIndex: 2,
+        justifyContent: "space-between",
+        left: 0,
+        right: 0,
+        paddingHorizontal: 20,
     },
     artwork: {
-    },
-    body: {
-        marginTop: 144,
     },
     card: {
         alignItems: "center",
@@ -188,6 +222,7 @@ const styles = StyleSheet.create ({
         paddingTop: 60,
         paddingBottom: 18,
         gap: 16,
+        marginTop: 144,
     },
 
 });
